@@ -11,30 +11,6 @@ get '/' do
 
 end
 
-get '/login' do     # when a GET request comes into /login
-    erb(:login)     # render app/views/login.erb
-end
-
-post '/login' do    
-    username = params[:username]    
-    password = params[:password]
-    
-    user = User.find_by(username: username)
-    
-    if user && user.password == password
-        session[:user_id] = user.id
-        redirect to ('/')
-    else
-        @error_message = "Login failed."
-        erb(:login)
- end
-end
-
-get '/logout' do
-    session[:user_id] = nil
-    redirect to ('/')
-end
-
 get '/signup' do        # if a user navigates to the path "/signup",
     @user = User.new    # setup empty @user object
     erb(:signup)        # render "app/views/signup.erb"
@@ -55,4 +31,52 @@ post '/signup' do
     else
         erb(:signup)
     end
+end 
+
+
+get '/login' do     # when a GET request comes into /login
+    erb(:login)     # render app/views/login.erb
 end
+
+post '/login' do    
+    username = params[:username]    
+    password = params[:password]
+    
+    user = User.find_by(username: username)
+    
+    if user && user.password == password
+        session[:user_id] = user.id
+        redirect to ('/')
+    else
+        @error_message = "Login failed."
+        erb(:login)
+    end
+end
+
+get '/logout' do
+    session[:user_id] = nil
+    redirect to ('/')
+end
+
+get '/posts/new' do
+    @post = Post.new
+    erb(:"posts/new")
+end
+
+post '/posts' do
+    photo_url = params[:photo_url]
+    
+    @post = Post.new({ photo_url: photo_url, user_id: current_user.id })
+    
+    if @post.save
+        redirect(to('/'))
+    else
+        erb(:"posts/new")
+    end
+end
+
+get '/posts/:id' do
+    @post = Post.find(params[:id])
+    erb(:"posts/show")
+end
+
